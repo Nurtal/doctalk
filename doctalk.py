@@ -38,7 +38,7 @@ def load_data(data_folder, vector_file, model_path):
     doc_list = []
     for doc in glob.glob(f"{data_folder}/*.md"):
 
-        log_data = open("bot.log", "a")
+        log_data = open("logs/bot.log", "a")
         log_data.write(f"{doc} detected in {data_folder}\n")
         log_data.close()
 
@@ -82,7 +82,7 @@ def load_data(data_folder, vector_file, model_path):
     for i in range(len(text_list)):
         text_to_vector[text_list[i]] = embedded_texts[i]
 
-    log_data = open("bot.log", "a")
+    log_data = open("logs/bot.log", "a")
     log_data.write(f"{len(text_to_vector)} element vectorized\n")
     log_data.write(f"{len(doc_list)} document found\n")
     log_data.close()
@@ -125,7 +125,7 @@ def pick_context(text_to_vectors, query, model_path, nb_elt):
 
     # save context
     context = ". ".join(context_list)
-    log_data = open("bot.log", "a")
+    log_data = open("logs/bot.log", "a")
     log_data.write(f"pick context : {context}\n")
     log_data.close()
 
@@ -133,8 +133,8 @@ def pick_context(text_to_vectors, query, model_path, nb_elt):
     return context_list
 
 
-def rerank_context(context_list, query, nb_to_keep):
-    """ """
+def rerank_context(context_list: list, query: str, nb_to_keep: int) -> list:
+    """rerank context selected though LLM embedding"""
 
     # rerank contexts
     context_list = rerank.bert_rerank(context_list, query, nb_to_keep)
@@ -143,7 +143,7 @@ def rerank_context(context_list, query, nb_to_keep):
     context = ". ".join(context_list)
 
     # save log
-    log_data = open("bot.log", "a")
+    log_data = open("logs/bot.log", "a")
     log_data.write(f"save context : {context}\n")
     log_data.close()
 
@@ -183,7 +183,7 @@ def run(vector_file, doc_repo, question, model_path):
     # load data
     if not os.path.isfile(vector_file):
         load_data(doc_repo, vector_file, model_path)
-        log_data = open("bot.log", "a")
+        log_data = open("logs/bot.log", "a")
         log_data.write("data vectorized\n")
         log_data.close()
 
@@ -219,47 +219,11 @@ def run_demo():
     question = "Le sloubinator est il dangereux pour les ordinateurs quantiques ?"
 
     # init log file
-    log_data = open("bot.log", "w")
+    log_data = open("logs/bot.log", "w")
     log_data.close()
 
     # run
     run(vector_file, doc_repo, question, model_path)
-
-
-def test_all_models(query):
-    """ """
-
-    # parameters
-    model_list = [
-        "/home/bran/Workspace/misc/llama/models/mistral-7b-v0.1.Q5_K_M.gguf",
-        "/home/bran/Workspace/misc/llama/models/llama-2-7b-chat.Q6_K.gguf",
-        "/home/bran/Workspace/misc/llama/models/llama-2-13b-chat.Q5_K_M.gguf",
-        "/home/bran/Workspace/misc/llama/models/llama-2-70b-chat.Q5_K_M.gguf",
-    ]
-
-    # loop over model
-    model_to_answer = {}
-    model_to_context = {}
-    for llm_model in model_list:
-
-        # get vector folder
-        vector_folder = llm_model.split("/")[-1].split("b-")[0] + "b"
-        vector_folder = f"vectors/{vector_folder}"
-
-        # run llm
-        ctx = context.pick_context(vector_folder, query, llm_model)
-        answer = get_answer(query, ctx, llm_model)
-        model_to_answer[llm_model] = answer
-        model_to_context[llm_model] = ctx
-
-    # display results
-    print(f"[*][USER INPUT] {query}")
-    print("##############")
-    for model in model_list:
-        print(f"[+][MODEL] {model}")
-        print(f"\t -> CONTEXT :\n{model_to_context[model]}\n")
-        print(f"\t -> ANSWER :\n{model_to_answer[model]}\n")
-        print("-" * 45)
 
 
 if __name__ == "__main__":
@@ -272,7 +236,7 @@ if __name__ == "__main__":
     reload = False
 
     # init log file
-    log_data = open("bot.log", "w")
+    log_data = open("logs/bot.log", "w")
     log_data.close()
 
     # catch arguments

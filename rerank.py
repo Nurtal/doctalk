@@ -8,7 +8,7 @@ def bert_rerank(context_list: list, query: str, closest_n: int) -> list:
 
     # parameters
     picked_context = []
-    log_file = "bot.log"
+    log_file = "logs/bot.log"
 
     # open log file
     if os.path.isfile(log_file):
@@ -31,7 +31,7 @@ def bert_rerank(context_list: list, query: str, closest_n: int) -> list:
     results = sorted(results, key=lambda x: x[1])
     for idx, distance in results[0:closest_n]:
         log_data.write(
-            f"[RERANK][PICKED] => {context_list[idx].strip()} | SCORE : {1 - distance}"
+            f"[RERANK][PICKED] => {context_list[idx].strip()} | SCORE : {1 - distance}\n"
         )
         picked_context.append(context_list[idx].strip())
 
